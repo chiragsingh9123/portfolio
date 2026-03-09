@@ -1,0 +1,2761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chirag | Backend Engineer & Server Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff88;
+    --green-dim: #00cc66;
+    --green-glow: rgba(0,255,136,0.3);
+    --cyan: #00ffff;
+    --cyan-dim: #00cccc;
+    --red: #ff3333;
+    --yellow: #ffff00;
+    --yellow-dim: #cccc00;
+    --purple: #cc88ff;
+    --orange: #ff8800;
+    --bg: #0a0c0a;
+    --bg2: #0d110d;
+    --bg3: #111811;
+    --border: #1a2e1a;
+    --border-bright: #2a4a2a;
+    --text: #c8e6c9;
+    --text-dim: #558855;
+    --text-bright: #e8f5e9;
+    --scanline: rgba(0,255,136,0.03);
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Space Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ─── CUSTOM CURSOR ─── */
+  #cursor {
+    position: fixed;
+    width: 20px; height: 20px;
+    border: 2px solid var(--green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width .2s, height .2s, background .2s;
+    box-shadow: 0 0 10px var(--green-glow);
+  }
+  #cursor-dot {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--green);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 6px var(--green);
+  }
+  body:hover #cursor { width: 32px; height: 32px; background: var(--green-glow); }
+
+  /* ─── SCANLINES ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 9998;
+    animation: scanlineFlicker 8s infinite;
+  }
+
+  @keyframes scanlineFlicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+    98% { opacity: 0.7; }
+  }
+
+  /* ─── CRT VIGNETTE ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  /* ─── MATRIX RAIN CANVAS ─── */
+  #matrix-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 0;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  /* ─── PARTICLE FIELD ─── */
+  #particle-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ─── NAVBAR ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    background: rgba(10,12,10,0.92);
+    border-bottom: 1px solid var(--border-bright);
+    backdrop-filter: blur(12px);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    box-shadow: 0 0 30px rgba(0,255,136,0.1);
+  }
+
+  .nav-bar-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    animation: navGlow 3s infinite;
+  }
+
+  @keyframes navGlow {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .nav-logo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green);
+    letter-spacing: 2px;
+    flex: 0 0 auto;
+    animation: logoPulse 4s infinite;
+  }
+
+  @keyframes logoPulse {
+    0%, 100% { text-shadow: 0 0 10px var(--green); }
+    50% { text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-glow); }
+  }
+
+  .nav-prompt { color: var(--green-dim); margin: 0 8px; }
+
+  .nav-links {
+    display: flex;
+    gap: 0;
+    margin-left: auto;
+    list-style: none;
+  }
+
+  .nav-links li a {
+    display: block;
+    padding: 0 16px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 1px;
+    transition: color .2s, text-shadow .2s;
+    height: 56px;
+    line-height: 56px;
+    position: relative;
+  }
+
+  .nav-links li a::before {
+    content: './';
+    color: var(--green);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .nav-links li a:hover { color: var(--green); text-shadow: 0 0 8px var(--green); }
+  .nav-links li a:hover::before { opacity: 1; }
+
+  .nav-status {
+    margin-left: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ─── MAIN LAYOUT ─── */
+  main { position: relative; z-index: 2; }
+
+  section { min-height: 100vh; position: relative; }
+
+  /* ─── HERO ─── */
+  #hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 5vw 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    animation: gridShift 20s linear infinite;
+  }
+
+  @keyframes gridShift {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  .terminal-window {
+    background: rgba(13,17,13,0.92);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    max-width: 900px;
+    box-shadow:
+      0 0 0 1px rgba(0,255,136,0.1),
+      0 20px 60px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(0,255,136,0.1);
+    animation: terminalAppear 1s ease forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  @keyframes terminalAppear {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .term-titlebar {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .term-btn { width: 13px; height: 13px; border-radius: 50%; }
+  .term-btn.red { background: #ff5f56; box-shadow: 0 0 6px #ff5f56; }
+  .term-btn.yellow { background: #ffbd2e; box-shadow: 0 0 6px #ffbd2e; }
+  .term-btn.green { background: #27c93f; box-shadow: 0 0 6px #27c93f; }
+
+  .term-title {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  .term-body {
+    padding: 28px 32px;
+    min-height: 320px;
+    font-size: clamp(0.7rem, 1.5vw, 0.88rem);
+    line-height: 1.8;
+  }
+
+  .term-line { display: flex; gap: 8px; margin-bottom: 4px; }
+
+  .prompt { color: var(--green); white-space: nowrap; }
+  .prompt .at { color: var(--yellow); }
+  .prompt .path { color: var(--cyan); }
+  .prompt .dollar { color: var(--green); }
+
+  .cmd { color: var(--text-bright); }
+  .output { color: var(--text); padding-left: 0; }
+  .output.green { color: var(--green); }
+  .output.cyan { color: var(--cyan); }
+  .output.yellow { color: var(--yellow); }
+  .output.red { color: var(--red); }
+  .output.purple { color: var(--purple); }
+  .output.orange { color: var(--orange); }
+  .output.dim { color: var(--text-dim); }
+
+  .hero-name {
+    font-size: clamp(2rem, 5vw, 4.5rem);
+    font-weight: 800;
+    color: var(--green);
+    text-shadow:
+      0 0 20px var(--green),
+      0 0 60px rgba(0,255,136,0.4);
+    letter-spacing: 4px;
+    line-height: 1;
+    margin: 20px 0 8px;
+    animation: nameGlow 4s ease infinite;
+  }
+
+  @keyframes nameGlow {
+    0%, 100% { text-shadow: 0 0 20px var(--green), 0 0 40px rgba(0,255,136,0.3); }
+    50% { text-shadow: 0 0 40px var(--green), 0 0 80px rgba(0,255,136,0.5), 0 0 120px rgba(0,255,136,0.2); }
+  }
+
+  .hero-role {
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: var(--green);
+    vertical-align: middle;
+    animation: cursorBlink 1s step-end infinite;
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .typewriter { overflow: hidden; white-space: nowrap; }
+
+  .term-separator {
+    border: none;
+    border-top: 1px solid var(--border-bright);
+    margin: 16px 0;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .tag {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.25);
+    color: var(--green);
+    padding: 3px 12px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    transition: all .2s;
+    cursor: default;
+  }
+
+  .tag:hover {
+    background: rgba(0,255,136,0.2);
+    border-color: var(--green);
+    box-shadow: 0 0 10px var(--green-glow);
+    transform: translateY(-2px);
+  }
+
+  .tag.cyan {
+    background: rgba(0,255,255,0.08);
+    border-color: rgba(0,255,255,0.25);
+    color: var(--cyan);
+  }
+  .tag.cyan:hover { background: rgba(0,255,255,0.2); border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,255,255,0.3); }
+
+  .tag.yellow {
+    background: rgba(255,255,0,0.08);
+    border-color: rgba(255,255,0,0.25);
+    color: var(--yellow);
+  }
+  .tag.yellow:hover { background: rgba(255,255,0,0.15); }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-decoration: none;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .3s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 20px var(--green-glow);
+  }
+
+  .btn-primary:hover {
+    background: var(--text-bright);
+    box-shadow: 0 0 40px var(--green-glow), 0 0 80px var(--green-glow);
+    transform: translateY(-3px);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(0,255,136,0.1);
+    box-shadow: 0 0 20px var(--green-glow);
+    transform: translateY(-3px);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+    animation: statSlide 1s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .stat:nth-child(1) { animation-delay: 0.5s; }
+  .stat:nth-child(2) { animation-delay: 0.7s; }
+  .stat:nth-child(3) { animation-delay: 0.9s; }
+  .stat:nth-child(4) { animation-delay: 1.1s; }
+
+  @keyframes statSlide {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-num {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green);
+    display: block;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ─── SECTION COMMON ─── */
+  .section-header {
+    padding: 80px 5vw 0;
+    margin-bottom: 60px;
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .section-label span { color: var(--green); }
+
+  .section-title {
+    font-size: clamp(1.6rem, 3vw, 2.8rem);
+    font-weight: 800;
+    color: var(--text-bright);
+    letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+  }
+
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), transparent);
+  }
+
+  /* ─── ABOUT ─── */
+  #about {
+    padding: 0;
+    background: var(--bg2);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    padding: 0 5vw 80px;
+    align-items: start;
+  }
+
+  .about-terminal {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: fadeInLeft 0.8s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .about-info {
+    animation: fadeInRight 0.8s ease 0.2s forwards;
+    opacity: 0;
+  }
+
+  .info-card {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    transition: all .3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+  }
+
+  .info-card:hover {
+    border-color: rgba(0,255,136,0.4);
+    box-shadow: 0 0 20px rgba(0,255,136,0.1);
+    transform: translateX(4px);
+  }
+
+  .info-card-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .info-card-value {
+    font-size: 0.9rem;
+    color: var(--text-bright);
+    font-weight: 600;
+  }
+
+  .info-card-value span { color: var(--green); }
+
+  /* ─── SKILLS ─── */
+  #skills {
+    padding: 80px 5vw;
+    background: var(--bg);
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .skill-category {
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all .3s;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .skill-category:hover {
+    border-color: rgba(0,255,136,0.4);
+    box-shadow: 0 0 30px rgba(0,255,136,0.1);
+    transform: translateY(-4px);
+  }
+
+  .skill-cat-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .skill-cat-icon { font-size: 1.2rem; }
+
+  .skill-cat-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .skill-cat-body { padding: 20px; }
+
+  .skill-item {
+    margin-bottom: 16px;
+  }
+
+  .skill-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .skill-name {
+    font-size: 0.78rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .skill-pct {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  .skill-bar {
+    height: 4px;
+    background: var(--border-bright);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .skill-fill {
+    height: 100%;
+    border-radius: 2px;
+    width: 0;
+    transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
+    position: relative;
+  }
+
+  .skill-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0;
+    width: 8px; height: 100%;
+    background: white;
+    border-radius: 2px;
+    filter: blur(3px);
+    opacity: 0.8;
+  }
+
+  .skill-fill.green { background: linear-gradient(90deg, var(--green-dim), var(--green)); box-shadow: 0 0 8px var(--green-glow); }
+  .skill-fill.cyan { background: linear-gradient(90deg, var(--cyan-dim), var(--cyan)); box-shadow: 0 0 8px rgba(0,255,255,0.3); }
+  .skill-fill.yellow { background: linear-gradient(90deg, var(--yellow-dim), var(--yellow)); box-shadow: 0 0 8px rgba(255,255,0,0.3); }
+  .skill-fill.purple { background: linear-gradient(90deg, #9944cc, var(--purple)); box-shadow: 0 0 8px rgba(204,136,255,0.3); }
+  .skill-fill.orange { background: linear-gradient(90deg, #cc6600, var(--orange)); box-shadow: 0 0 8px rgba(255,136,0,0.3); }
+
+  /* ─── PROJECTS ─── */
+  #projects {
+    padding: 80px 5vw;
+    background: var(--bg2);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .project-card {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all .4s;
+    cursor: pointer;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    position: relative;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,255,136,0.05), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+
+  .project-card:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 40px rgba(0,255,136,0.15), 0 20px 40px rgba(0,0,0,0.4);
+    transform: translateY(-8px);
+  }
+
+  .project-card:hover::before { opacity: 1; }
+
+  .project-header {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.7rem;
+  }
+
+  .project-file { color: var(--green); font-weight: 600; }
+  .project-dots { display: flex; gap: 6px; }
+  .project-dots span {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .project-dots span:nth-child(1) { background: #ff5f56; }
+  .project-dots span:nth-child(2) { background: #ffbd2e; }
+  .project-dots span:nth-child(3) { background: #27c93f; }
+
+  .project-body { padding: 24px; }
+
+  .project-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  .project-desc {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 20px;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .tech-badge {
+    font-size: 0.65rem;
+    padding: 2px 10px;
+    border-radius: 3px;
+    border: 1px solid;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  .tech-badge.python { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.3); color: var(--green); }
+  .tech-badge.flask { background: rgba(0,255,255,0.08); border-color: rgba(0,255,255,0.3); color: var(--cyan); }
+  .tech-badge.mysql { background: rgba(255,136,0,0.08); border-color: rgba(255,136,0,0.3); color: var(--orange); }
+  .tech-badge.telegram { background: rgba(204,136,255,0.08); border-color: rgba(204,136,255,0.3); color: var(--purple); }
+  .tech-badge.selenium { background: rgba(255,255,0,0.08); border-color: rgba(255,255,0,0.3); color: var(--yellow); }
+  .tech-badge.android { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.3); color: var(--green-dim); }
+  .tech-badge.asterisk { background: rgba(255,51,51,0.08); border-color: rgba(255,51,51,0.3); color: var(--red); }
+  .tech-badge.crypto { background: rgba(255,136,0,0.08); border-color: rgba(255,136,0,0.3); color: var(--orange); }
+  .tech-badge.websocket { background: rgba(0,255,255,0.08); border-color: rgba(0,255,255,0.3); color: var(--cyan); }
+  .tech-badge.mongo { background: rgba(0,255,136,0.08); border-color: rgba(0,255,136,0.3); color: var(--green); }
+  .tech-badge.nginx { background: rgba(204,136,255,0.08); border-color: rgba(204,136,255,0.3); color: var(--purple); }
+  .tech-badge.linux { background: rgba(255,255,0,0.08); border-color: rgba(255,255,0,0.3); color: var(--yellow); }
+
+  .project-footer {
+    border-top: 1px solid var(--border-bright);
+    padding: 12px 24px;
+    display: flex;
+    gap: 16px;
+    font-size: 0.7rem;
+  }
+
+  .project-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .2s;
+    letter-spacing: 1px;
+  }
+
+  .project-link:hover { color: var(--green); }
+
+  .project-status {
+    margin-left: auto;
+    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .project-status::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: blink 2s infinite;
+  }
+
+  /* ─── EXPERIENCE / TIMELINE ─── */
+  #experience {
+    padding: 80px 5vw;
+    background: var(--bg);
+  }
+
+  .timeline {
+    position: relative;
+    max-width: 900px;
+    margin: 60px auto 0;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 24px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, var(--green), rgba(0,255,136,0.1));
+    box-shadow: 0 0 8px var(--green-glow);
+  }
+
+  .timeline-item {
+    padding-left: 70px;
+    margin-bottom: 50px;
+    position: relative;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 14px;
+    top: 8px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--green);
+    box-shadow: 0 0 12px var(--green-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+  }
+
+  .timeline-dot::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  .timeline-card {
+    background: var(--bg2);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 24px;
+    transition: all .3s;
+    position: relative;
+  }
+
+  .timeline-card::before {
+    content: '';
+    position: absolute;
+    left: -8px; top: 16px;
+    width: 16px; height: 16px;
+    background: var(--bg2);
+    border-left: 1px solid var(--border-bright);
+    border-bottom: 1px solid var(--border-bright);
+    transform: rotate(45deg);
+  }
+
+  .timeline-card:hover {
+    border-color: rgba(0,255,136,0.4);
+    box-shadow: 0 0 20px rgba(0,255,136,0.1);
+  }
+
+  .timeline-date {
+    font-size: 0.68rem;
+    color: var(--green);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .timeline-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-bright);
+    margin-bottom: 6px;
+  }
+
+  .timeline-company {
+    font-size: 0.78rem;
+    color: var(--cyan);
+    margin-bottom: 14px;
+  }
+
+  .timeline-desc {
+    font-size: 0.77rem;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .timeline-desc li { margin-bottom: 6px; padding-left: 16px; position: relative; list-style: none; }
+  .timeline-desc li::before { content: '▸'; position: absolute; left: 0; color: var(--green); }
+
+  /* ─── TOOLS / SETUP ─── */
+  #setup {
+    padding: 80px 5vw;
+    background: var(--bg2);
+  }
+
+  .setup-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 60px;
+  }
+
+  .tool-card {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all .3s;
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    cursor: default;
+  }
+
+  .tool-card:hover {
+    border-color: rgba(0,255,136,0.5);
+    box-shadow: 0 0 20px rgba(0,255,136,0.1);
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  .tool-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+  .tool-name { font-size: 0.82rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+  .tool-desc { font-size: 0.68rem; color: var(--text-dim); letter-spacing: 1px; }
+
+  /* ─── LIVE TERMINAL ─── */
+  #live-terminal {
+    padding: 80px 5vw;
+    background: var(--bg);
+  }
+
+  .live-terminal-wrapper {
+    max-width: 800px;
+    margin: 60px auto 0;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(0,255,136,0.1);
+  }
+
+  .live-term-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border-bright);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  .live-term-body {
+    padding: 20px;
+    height: 320px;
+    overflow-y: auto;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    scroll-behavior: smooth;
+  }
+
+  .live-term-body::-webkit-scrollbar { width: 4px; }
+  .live-term-body::-webkit-scrollbar-track { background: var(--bg); }
+  .live-term-body::-webkit-scrollbar-thumb { background: var(--border-bright); }
+
+  .live-term-input-row {
+    display: flex;
+    align-items: center;
+    border-top: 1px solid var(--border-bright);
+    padding: 12px 20px;
+    gap: 10px;
+  }
+
+  .live-term-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-bright);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    caret-color: var(--green);
+  }
+
+  /* ─── CONTACT ─── */
+  #contact {
+    padding: 80px 5vw 120px;
+    background: var(--bg2);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    margin-top: 60px;
+    align-items: start;
+  }
+
+  .contact-form-terminal {
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .form-body { padding: 28px; }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--green);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 10px 16px;
+    color: var(--text-bright);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    outline: none;
+    transition: all .2s;
+  }
+
+  .form-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 12px rgba(0,255,136,0.2);
+  }
+
+  textarea.form-input { min-height: 120px; resize: vertical; }
+
+  .contact-info { }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 20px 24px;
+    text-decoration: none;
+    color: var(--text);
+    margin-bottom: 16px;
+    transition: all .3s;
+    font-size: 0.82rem;
+  }
+
+  .contact-link:hover {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 20px rgba(0,255,136,0.1);
+    transform: translateX(8px);
+  }
+
+  .contact-link-icon { font-size: 1.4rem; width: 36px; text-align: center; }
+  .contact-link-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; display: block; text-transform: uppercase; }
+  .contact-link-value { font-weight: 600; color: inherit; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border-bright);
+    padding: 40px 5vw;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+  }
+
+  footer .foot-logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green);
+    margin-bottom: 12px;
+    display: block;
+    letter-spacing: 4px;
+  }
+
+  /* ─── SCROLL PROGRESS ─── */
+  #scroll-progress {
+    position: fixed;
+    top: 56px;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    box-shadow: 0 0 8px var(--green);
+    transform-origin: left;
+    transform: scaleX(0);
+    z-index: 999;
+    transition: transform .1s;
+  }
+
+  /* ─── GLITCH ─── */
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+  }
+
+  .glitch::before {
+    color: var(--cyan);
+    animation: glitchTop 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    transform: translate(-2px, 0);
+    opacity: 0.7;
+  }
+
+  .glitch::after {
+    color: var(--red);
+    animation: glitchBottom 2.5s infinite linear alternate-reverse;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    transform: translate(2px, 0);
+    opacity: 0.7;
+  }
+
+  @keyframes glitchTop {
+    0%, 40%, 44%, 58%, 61%, 65%, 69%, 73%, 100% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(-2px, 0); }
+    41% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(2px, 0); }
+    42% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(0, 0); }
+    59% { clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(1px, 0); }
+  }
+
+  @keyframes glitchBottom {
+    0%, 40%, 44%, 58%, 61%, 65%, 69%, 73%, 100% { clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); transform: translate(2px, 0); }
+    41% { clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); transform: translate(-2px, 0); }
+    42% { clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); transform: translate(0, 0); }
+  }
+
+  /* ─── ANIMATIONS ─── */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── HEXAGON DECORATION ─── */
+  .hex-decoration {
+    position: absolute;
+    right: -10vw;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.05;
+    font-size: 40vw;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    color: var(--green);
+    animation: hexRotate 30s linear infinite;
+  }
+
+  @keyframes hexRotate {
+    from { transform: translateY(-50%) rotate(0deg); }
+    to { transform: translateY(-50%) rotate(360deg); }
+  }
+
+  /* ─── FLOATING ELEMENTS ─── */
+  .float-badge {
+    position: absolute;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.7rem;
+    color: var(--green);
+    animation: float 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-12px); }
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .about-grid, .contact-grid { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+    .hero-name { font-size: 2.5rem; }
+    .hex-decoration { display: none; }
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  .noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ─── LOADING SCREEN ─── */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease;
+  }
+
+  #loader.hidden { opacity: 0; pointer-events: none; }
+
+  .loader-text {
+    font-size: 0.8rem;
+    color: var(--green);
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+  }
+
+  .loader-bar-track {
+    width: 300px;
+    height: 2px;
+    background: var(--border-bright);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .loader-bar-fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green);
+    border-radius: 2px;
+    width: 0;
+    transition: width 0.1s;
+  }
+
+  .loader-percent {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 10px;
+    letter-spacing: 2px;
+  }
+
+  /* SSH CONNECTION ANIMATION */
+  .ssh-log { font-size: 0.72rem; margin-top: 20px; text-align: left; width: 300px; }
+  .ssh-line { color: var(--text-dim); margin-bottom: 3px; }
+  .ssh-line.ok { color: var(--green); }
+  .ssh-line.warn { color: var(--yellow); }
+
+  /* ─── UPTIME COUNTER ─── */
+  .uptime-display {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--green);
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.2);
+    padding: 4px 12px;
+    border-radius: 4px;
+    margin-left: 16px;
+  }
+
+  /* ─── NETWORK GRAPH ─── */
+  .network-vis {
+    margin-top: 24px;
+    background: var(--bg3);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .network-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border-bright);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ─── CODE RAIN BURST on click ─── */
+  .burst-char {
+    position: fixed;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--green);
+    pointer-events: none;
+    z-index: 99997;
+    animation: burst 0.8s ease-out forwards;
+  }
+
+  @keyframes burst {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NOISE OVERLAY -->
+<div class="noise"></div>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- LOADING SCREEN -->
+<div id="loader">
+  <div class="loader-text">INITIALIZING PORTFOLIO...</div>
+  <div class="loader-bar-track"><div class="loader-bar-fill" id="loader-fill"></div></div>
+  <div class="loader-percent" id="loader-pct">0%</div>
+  <div class="ssh-log" id="ssh-log"></div>
+</div>
+
+<!-- MATRIX CANVAS -->
+<canvas id="matrix-canvas"></canvas>
+<canvas id="particle-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">CHIRAG</span>
+  <span class="nav-prompt"><span class="at">@</span><span class="path">portfolio</span>:~$</span>
+  <ul class="nav-links">
+    <li><a href="#about">about</a></li>
+    <li><a href="#skills">skills</a></li>
+    <li><a href="#projects">projects</a></li>
+    <li><a href="#experience">experience</a></li>
+    <li><a href="#setup">setup</a></li>
+    <li><a href="#contact">contact</a></li>
+  </ul>
+  <div class="nav-status">
+    <div class="status-dot"></div>
+    <span>AVAILABLE</span>
+    <span class="uptime-display" id="uptime">00:00:00</span>
+  </div>
+  <div class="nav-bar-line"></div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hex-decoration">⬡</div>
+
+  <div class="hero-inner">
+
+    <!-- LEFT: Name + Info -->
+    <div class="hero-left-col">
+      <div id="hero-name-block">
+        <div class="hero-name glitch" data-text="CHIRAG">CHIRAG</div>
+        <div class="hero-role">Backend Engineer &amp; Server Architect<span class="cursor-blink"></span></div>
+        <!-- <br> -->
+        <!-- <hr class="term-separator">
+        <div class="term-line" id="line2">
+          <span class="prompt dim">▶</span>
+          <span class="output" id="type-bio"></span>
+        </div> -->
+        <br>
+        <div class="tag-row" id="tag-row">
+          <span class="tag">Python</span>
+          <span class="tag">Flask</span>
+          <span class="tag cyan">MySQL</span>
+          <span class="tag cyan">Linux</span>
+          <span class="tag yellow">Telegram Bot</span>
+          <span class="tag yellow">Selenium</span>
+          <span class="tag">Asterisk</span>
+          <span class="tag cyan">VPS/Servers</span>
+          <span class="tag">Android Automation</span>
+          <span class="tag yellow">Crypto Payments</span>
+          <span class="tag">REST APIs</span>
+          <span class="tag cyan">WebSockets</span>
+        </div>
+        <div class="hero-cta" id="hero-cta">
+          <a href="#projects" class="btn btn-primary">./view_projects</a>
+          <a href="#contact" class="btn btn-secondary">./contact_me</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Interactive Terminal -->
+    <div class="hero-right-col">
+      <div class="terminal-window">
+        <div class="term-titlebar">
+          <div class="term-btn red"></div>
+          <div class="term-btn yellow"></div>
+          <div class="term-btn green"></div>
+          <div class="term-title">chirag@portfolio: ~ — bash — 120×40</div>
+        </div>
+
+        <!-- ASCII art output -->
+        <!-- <div id="hero-output">
+          <br>
+          <div class="term-line"><span class="output green">     ██████╗ ██╗  ██╗ ██╗██████╗  █████╗  ██████╗</span></div>
+          <div class="term-line"><span class="output green">    ██╔════╝ ██║  ██║ ██║██╔══██╗██╔══██╗██╔════╝</span></div>
+          <div class="term-line"><span class="output green">    ██║      ███████║ ██║██████╔╝███████║██║  ███╗</span></div>
+          <div class="term-line"><span class="output green">    ██║      ██╔══██║ ██║██╔══██╗██╔══██║██║   ██║</span></div>
+          <div class="term-line"><span class="output green">    ╚██████╗ ██║  ██║ ██║██║  ██║██║  ██║╚██████╔╝</span></div>
+          <div class="term-line"><span class="output green">     ╚═════╝ ╚═╝  ╚═╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝</span></div>
+          <br>
+        </div> -->
+
+        <!-- Interactive terminal body -->
+        <div class="term-body" style="padding:0">
+          <div class="live-term-body" id="live-output" style="height:260px">
+            <div style="color:var(--green)">Connected to chirag@portfolio</div>
+            <div style="color:var(--text-dim)">Last login: Mon Mar 9 2026 from 0.0.0.0</div>
+            <div style="color:var(--yellow)">Type <span style="color:var(--green)">help</span> to see available commands.</div>
+            <br>
+          </div>
+
+          <!-- Quick hint buttons -->
+          <div style="display:flex;flex-wrap:wrap;gap:6px;padding:8px 20px;border-top:1px solid var(--border);background:rgba(0,255,136,0.02)">
+            <span class="iterm-hint-btn" onclick="quickCmd('help')">help</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('whoami')">whoami</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('skills')">skills</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('projects')">projects</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('contact')">contact</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('top')">top</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('ping')">ping</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('hack')">hack</span>
+            <span class="iterm-hint-btn" onclick="quickCmd('clear')">clear</span>
+          </div>
+
+          <div class="live-term-input-row">
+            <span class="prompt" style="font-size:0.8rem"><span class="at">chirag</span>@<span class="path">portfolio</span>:~$&nbsp;</span>
+            <input type="text" class="live-term-input" id="live-input" placeholder="type a command..." autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /hero-inner -->
+
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-num" data-target="50">25+</span><span class="stat-label">Projects Built</span></div>
+    <div class="stat"><span class="stat-num" data-target="4">4+</span><span class="stat-label">Years Experience</span></div>
+    <div class="stat"><span class="stat-num" data-target="15">15+</span><span class="stat-label">Technologies</span></div>
+    <div class="stat"><span class="stat-num" data-target="99">99+</span><span class="stat-label">Uptime %</span></div>
+  </div>
+</section>
+
+<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<section id="about">
+  <div class="section-header">
+    <div class="section-label"><span>01</span> / about</div>
+    <h2 class="section-title animate-on-scroll">whoami</h2>
+  </div>
+  <div class="about-grid">
+    <div class="about-terminal animate-on-scroll" style="transition-delay:0.1s">
+      <div class="term-titlebar">
+        <div class="term-btn red"></div>
+        <div class="term-btn yellow"></div>
+        <div class="term-btn green"></div>
+        <div class="term-title">system_info.sh</div>
+      </div>
+      <div class="term-body" style="font-size:0.8rem">
+        <div class="term-line"><span class="output green">$ cat /etc/os-release</span></div>
+        <div class="term-line"><span class="output dim">NAME="Arch Linux (Custom Server Build)"</span></div>
+        <div class="term-line"><span class="output dim">PRETTY_NAME="Chirag OS v4.2"</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ uname -a</span></div>
+        <div class="term-line"><span class="output dim">Linux chirag-dev 6.x.x #1 SMP PREEMPT</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ cat /proc/cpuinfo | grep "model name"</span></div>
+        <div class="term-line"><span class="output cyan">model name : Backend Engineer Core™ i∞</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ free -h</span></div>
+        <div class="term-line"><span class="output dim">Skills:  total=∞  used=90%  free=10%</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ ps aux | grep passion</span></div>
+        <div class="term-line"><span class="output yellow">chirag  1337  99.9 automation</span></div>
+        <div class="term-line"><span class="output yellow">chirag  1338  98.5 backend-api</span></div>
+        <div class="term-line"><span class="output yellow">chirag  1339  97.2 server-admin</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ uptime</span></div>
+        <div class="term-line"><span class="output dim"> up 4 years, load avg: high, building, shipping</span></div>
+        <br>
+        <div class="term-line"><span class="output green">$ hostname -I</span></div>
+        <div class="term-line"><span class="output cyan">📍 Meerut, Uttar Pradesh, India</span></div>
+      </div>
+    </div>
+
+    <div class="about-info animate-on-scroll" style="transition-delay:0.3s">
+      <div class="info-card">
+        <div class="info-card-label">// identity</div>
+        <div class="info-card-value"><span>Chirag</span> — Backend Engineer & Server Specialist</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">// current_focus</div>
+        <div class="info-card-value">Building <span>automation systems</span>, <span>Telegram bots</span>, <span>payment integrations</span> & <span>VoIP platforms</span></div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">// philosophy</div>
+        <div class="info-card-value">"If it can be automated, <span>automate it</span>. If it can't, <span>make it can</span>."</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">// specialization</div>
+        <div class="info-card-value"><span>Real-money transaction systems</span>, mobile automation, multi-user bot architectures</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">// languages</div>
+        <div class="info-card-value"><span>Python</span> (primary) · <span>Java</span> · Bash · SQL · HTML/CSS/JS</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">// server_stack</div>
+        <div class="info-card-value"><span>Ubuntu/Debian VPS</span> · Nginx · Supervisor · MySQL · MongoDB</div>
+      </div>
+
+      <div class="network-vis animate-on-scroll">
+        <div class="network-header">
+          <div class="status-dot"></div>
+          <span>network_activity.log — live</span>
+        </div>
+        <canvas id="network-canvas" width="400" height="120" style="width:100%;display:block"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SKILLS ═══════════════════ -->
+<section id="skills">
+  <div class="section-header">
+    <div class="section-label"><span>02</span> / skills</div>
+    <h2 class="section-title animate-on-scroll">tech_stack --list-all</h2>
+  </div>
+
+  <div class="skills-grid">
+    <!-- Backend -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">⚙️</span>
+        <span class="skill-cat-name">Backend & APIs</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Python</span><span class="skill-pct">95%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="95"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Flask</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="90"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">REST API Design</span><span class="skill-pct">88%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="88"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">WebSockets</span><span class="skill-pct">82%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="82"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Java</span><span class="skill-pct">75%</span></div>
+          <div class="skill-bar"><div class="skill-fill orange" data-width="75"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Database -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0.1s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">🗄️</span>
+        <span class="skill-cat-name">Databases</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">MySQL</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill orange" data-width="90"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">MongoDB</span><span class="skill-pct">80%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="80"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">SQLite</span><span class="skill-pct">85%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="85"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Redis</span><span class="skill-pct">65%</span></div>
+          <div class="skill-bar"><div class="skill-fill yellow" data-width="65"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Automation -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0.2s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">🤖</span>
+        <span class="skill-cat-name">Automation</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Selenium</span><span class="skill-pct">92%</span></div>
+          <div class="skill-bar"><div class="skill-fill yellow" data-width="92"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Android UIAutomator</span><span class="skill-pct">85%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="85"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Frida</span><span class="skill-pct">70%</span></div>
+          <div class="skill-bar"><div class="skill-fill purple" data-width="70"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Browser Scripting</span><span class="skill-pct">88%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="88"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Server & DevOps -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0.3s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">🖥️</span>
+        <span class="skill-cat-name">Server & DevOps</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Linux / Ubuntu / Arch</span><span class="skill-pct">93%</span></div>
+          <div class="skill-bar"><div class="skill-fill yellow" data-width="93"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Nginx / Apache</span><span class="skill-pct">85%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="85"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">VPS Management</span><span class="skill-pct">90%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="90"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Bash Scripting</span><span class="skill-pct">80%</span></div>
+          <div class="skill-bar"><div class="skill-fill orange" data-width="80"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Docker</span><span class="skill-pct">72%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="72"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bots & Payments -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0.4s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">💬</span>
+        <span class="skill-cat-name">Bots & Payments</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Telegram Bot API</span><span class="skill-pct">95%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="95"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Crypto Payments (BTC/LTC)</span><span class="skill-pct">82%</span></div>
+          <div class="skill-bar"><div class="skill-fill orange" data-width="82"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">BTCPay Server</span><span class="skill-pct">78%</span></div>
+          <div class="skill-bar"><div class="skill-fill yellow" data-width="78"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">LitePay Integration</span><span class="skill-pct">80%</span></div>
+          <div class="skill-bar"><div class="skill-fill green" data-width="80"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VoIP & Networking -->
+    <div class="skill-category animate-on-scroll" style="transition-delay:0.5s">
+      <div class="skill-cat-header">
+        <span class="skill-cat-icon">📡</span>
+        <span class="skill-cat-name">VoIP & Networking</span>
+      </div>
+      <div class="skill-cat-body">
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Asterisk PBX</span><span class="skill-pct">85%</span></div>
+          <div class="skill-bar"><div class="skill-fill purple" data-width="85"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">ARI (Asterisk REST)</span><span class="skill-pct">80%</span></div>
+          <div class="skill-bar"><div class="skill-fill purple" data-width="80"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Network Packet Analysis</span><span class="skill-pct">70%</span></div>
+          <div class="skill-bar"><div class="skill-fill cyan" data-width="70"></div></div>
+        </div>
+        <div class="skill-item">
+          <div class="skill-meta"><span class="skill-name">Deepgram STT</span><span class="skill-pct">75%</span></div>
+          <div class="skill-bar"><div class="skill-fill orange" data-width="75"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ PROJECTS ═══════════════════ -->
+<section id="projects">
+  <div class="section-header">
+    <div class="section-label"><span>03</span> / projects</div>
+    <h2 class="section-title animate-on-scroll">ls -la ~/projects/</h2>
+  </div>
+
+  <div class="projects-grid" style="padding: 0 5vw">
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0s">
+      <div class="project-header">
+        <span class="project-file">pressonebot/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">PressOne Call Bot System</div>
+        <div class="project-desc">Multi-user Asterisk ARI call platform with isolated sessions, conference bridge pattern, DTMF webhook forwarding, credit balances, caller ID management, country allowlists and full Telegram bot interface with inline buttons (hangup, hold, recall).</div>
+        <div class="project-tech">
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge flask">Flask</span>
+          <span class="tech-badge asterisk">Asterisk ARI</span>
+          <span class="tech-badge telegram">Telegram Bot</span>
+          <span class="tech-badge mysql">MySQL</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">📞 VoIP Platform</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.1s">
+      <div class="project-header">
+        <span class="project-file">crypto_key_bot/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Crypto Key Selling Bot</div>
+        <div class="project-desc">Telegram bot with LitePay & BTCPay integrations for automated key delivery. Features partial payment tracking, 30-min invoice expiry, top-up to complete flow, JSON transaction log, retry mechanism, and admin panel.</div>
+        <div class="project-tech">
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge telegram">Telegram Bot</span>
+          <span class="tech-badge crypto">BTCPay</span>
+          <span class="tech-badge crypto">LitePay</span>
+          <span class="tech-badge flask">Flask</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">₿ Payment System</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.2s">
+      <div class="project-header">
+        <span class="project-file">bharat_gas_bot/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Bharat Gas Automation</div>
+        <div class="project-desc">Selenium script attached to existing Chrome debug instance. Full cookie persistence, CAPTCHA solving pipeline, OTP fetch from external SMS API, consumer info validation via JSON config, and batch processing of LPG connection IDs from text files.</div>
+        <div class="project-tech">
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge selenium">Selenium</span>
+          <span class="tech-badge flask">Chrome Debug</span>
+          <span class="tech-badge android">LPG API</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">⛽ Gas Automation</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.3s">
+      <div class="project-header">
+        <span class="project-file">lpg_booking_bot/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">LPG Cylinder Booking Bot</div>
+        <div class="project-desc">Credit-based Telegram bot using KwikAPI (1 credit = 1 INR). Supports .txt upload of 17-digit LPG IDs for bulk booking, full transaction history, balance management, and admin controls.</div>
+        <div class="project-tech">
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge telegram">Telegram Bot</span>
+          <span class="tech-badge flask">KwikAPI</span>
+          <span class="tech-badge mysql">SQLite</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">🔥 Booking System</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.4s">
+      <div class="project-header">
+        <span class="project-file">admin_chat_system/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Bi-directional Admin Chat</div>
+        <div class="project-desc">Flask admin panel with TeleBot integration for two-way communication between Telegram users and web admin. No Socket.IO dependency — pure polling architecture. Multi-user support with message threading.</div>
+        <div class="project-tech">
+          <span class="tech-badge flask">Flask</span>
+          <span class="tech-badge telegram">TeleBot</span>
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge mysql">JSON DB</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">💬 Chat System</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.5s">
+      <div class="project-header">
+        <span class="project-file">audio_stream/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Live Audio Transcription Stream</div>
+        <div class="project-desc">WebSocket-based microphone streaming server with Deepgram real-time STT integration. Low-latency audio relay to multiple receiver clients. Android client-side transcription support and server-side processing modes.</div>
+        <div class="project-tech">
+          <span class="tech-badge websocket">WebSocket</span>
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge android">Android</span>
+          <span class="tech-badge flask">Deepgram</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">🎙️ Audio System</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.6s">
+      <div class="project-header">
+        <span class="project-file">delivery_credits/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Credit-Based Delivery Automation</div>
+        <div class="project-desc">Mobile UI automation with UIAutomator converted to a credit-based SaaS tool (1 credit = 1 successful delivery). Flask server, JSON database, login/credit-check/deduction API endpoints and web portal for user management.</div>
+        <div class="project-tech">
+          <span class="tech-badge android">UIAutomator</span>
+          <span class="tech-badge flask">Flask</span>
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge mysql">JSON DB</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">📦 Delivery Tool</span>
+        <span class="project-status">LIVE</span>
+      </div>
+    </div>
+
+    <div class="project-card animate-on-scroll" style="transition-delay:0.7s">
+      <div class="project-header">
+        <span class="project-file">bbps_wallet/</span>
+        <div class="project-dots"><span></span><span></span><span></span></div>
+      </div>
+      <div class="project-body">
+        <div class="project-title">Utility Bill Payment Platform</div>
+        <div class="project-desc">BBPS-style web platform for utility bill payments with integrated wallet system. Uses purchased bill payment API, user balance management, transaction history, and multi-biller support.</div>
+        <div class="project-tech">
+          <span class="tech-badge flask">Flask</span>
+          <span class="tech-badge mysql">MySQL</span>
+          <span class="tech-badge python">Python</span>
+          <span class="tech-badge crypto">Wallet API</span>
+        </div>
+      </div>
+      <div class="project-footer">
+        <span class="project-link">💳 FinTech Platform</span>
+        <span class="project-status">BUILDING</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════ EXPERIENCE ═══════════════════ -->
+<section id="experience">
+  <div class="section-header">
+    <div class="section-label"><span>04</span> / experience</div>
+    <h2 class="section-title animate-on-scroll">git log --oneline --all</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item animate-on-scroll" style="transition-delay:0s">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+        <div class="timeline-date">2024 — PRESENT</div>
+        <div class="timeline-title">Senior Backend Engineer & Automation Specialist</div>
+        <div class="timeline-company">Independent / Freelance · Full Remote</div>
+        <ul class="timeline-desc">
+          <li>Architected multi-user call session systems with Asterisk ARI for VoIP platforms handling real money transactions</li>
+          <li>Built end-to-end crypto payment flows (BTCPay + LitePay) with automated key delivery bots</li>
+          <li>Developed scalable Telegram bot ecosystems with Flask backends and MySQL databases</li>
+          <li>Managed production VPS deployments — Nginx, Supervisor, SSL, firewall configuration</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item animate-on-scroll" style="transition-delay:0.15s">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+        <div class="timeline-date">2023 — 2024</div>
+        <div class="timeline-title">Python Backend Developer & Bot Engineer</div>
+        <div class="timeline-company">Project-Based Work · Remote</div>
+        <ul class="timeline-desc">
+          <li>Created Selenium automation scripts attached to real Chrome debug sessions with cookie management</li>
+          <li>Built Android automation tools using UIAutomator with credit-based billing systems</li>
+          <li>Developed Flask + MongoDB backends for Android applications</li>
+          <li>Implemented live audio streaming pipelines with WebSocket and Deepgram STT</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item animate-on-scroll" style="transition-delay:0.3s">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+        <div class="timeline-date">2022 — 2023</div>
+        <div class="timeline-title">Full-Stack Automation & API Developer</div>
+        <div class="timeline-company">Independent Projects · Meerut, UP</div>
+        <ul class="timeline-desc">
+          <li>Built LPG Tkinter automation app with CAPTCHA solving, OTP handling via SMS APIs</li>
+          <li>Developed browser interaction tracer for passive HTTP logging and cookie sync</li>
+          <li>Created web portals for user management with full CRUD over JSON/SQLite databases</li>
+          <li>Began specializing in real-money systems — delivery credits, payment APIs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="timeline-item animate-on-scroll" style="transition-delay:0.45s">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+        <div class="timeline-date">2021 — 2022</div>
+        <div class="timeline-title">Self-Taught Developer — System Builder</div>
+        <div class="timeline-company">Learning Phase · Meerut, UP</div>
+        <ul class="timeline-desc">
+          <li>Mastered Python fundamentals and Java syntax through project-driven learning</li>
+          <li>First automation scripts — web scraping, form filling, data extraction</li>
+          <li>Explored Linux server administration and terminal workflows</li>
+          <li>Built first Telegram bot integrations and REST API consumers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SETUP / TOOLS ═══════════════════ -->
+<section id="setup">
+  <div class="section-header">
+    <div class="section-label"><span>05</span> / setup</div>
+    <h2 class="section-title animate-on-scroll">cat ~/.config/tools</h2>
+  </div>
+
+  <div class="setup-grid" style="padding: 0 5vw">
+    <div class="tool-card animate-on-scroll" style="transition-delay:0s"><span class="tool-icon">🐍</span><div class="tool-name">Python 3.11+</div><div class="tool-desc">PRIMARY LANGUAGE</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.05s"><span class="tool-icon">🐧</span><div class="tool-name">Linux / Ubuntu</div><div class="tool-desc">SERVER OS</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.1s"><span class="tool-icon">🖥️</span><div class="tool-name">VS Code + Vim</div><div class="tool-desc">EDITOR / IDE</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.15s"><span class="tool-icon">🐬</span><div class="tool-name">MySQL 8</div><div class="tool-desc">PRIMARY DB</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.2s"><span class="tool-icon">🍃</span><div class="tool-name">MongoDB</div><div class="tool-desc">NOSQL DB</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.25s"><span class="tool-icon">🌐</span><div class="tool-name">Nginx</div><div class="tool-desc">REVERSE PROXY</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.3s"><span class="tool-icon">🔵</span><div class="tool-name">Telegram API</div><div class="tool-desc">BOT PLATFORM</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.35s"><span class="tool-icon">📱</span><div class="tool-name">Android ADB</div><div class="tool-desc">MOBILE AUTO</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.4s"><span class="tool-icon">🕷️</span><div class="tool-name">Selenium</div><div class="tool-desc">WEB SCRAPER</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.45s"><span class="tool-icon">📞</span><div class="tool-name">Asterisk PBX</div><div class="tool-desc">VOIP ENGINE</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.5s"><span class="tool-icon">🐳</span><div class="tool-name">Docker</div><div class="tool-desc">CONTAINERIZE</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.55s"><span class="tool-icon">🔐</span><div class="tool-name">Frida</div><div class="tool-desc">INTROSPECTION</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.6s"><span class="tool-icon">₿</span><div class="tool-name">BTCPay Server</div><div class="tool-desc">CRYPTO GATEWAY</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.65s"><span class="tool-icon">🌊</span><div class="tool-name">Flask</div><div class="tool-desc">WEB FRAMEWORK</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.7s"><span class="tool-icon">⚡</span><div class="tool-name">Supervisor</div><div class="tool-desc">PROCESS MGR</div></div>
+    <div class="tool-card animate-on-scroll" style="transition-delay:0.75s"><span class="tool-icon">🎙️</span><div class="tool-name">Deepgram</div><div class="tool-desc">SPEECH-TO-TEXT</div></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ CONTACT ═══════════════════ -->
+<section id="contact">
+  <div class="section-header">
+    <div class="section-label"><span>07</span> / contact</div>
+    <h2 class="section-title animate-on-scroll">./send_message.sh</h2>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-form-terminal animate-on-scroll" style="transition-delay:0.1s">
+      <div class="term-titlebar">
+        <div class="term-btn red"></div>
+        <div class="term-btn yellow"></div>
+        <div class="term-btn green"></div>
+        <div class="term-title">compose_message.sh</div>
+      </div>
+      <div class="form-body">
+        <div class="form-group">
+          <label class="form-label">// your_name</label>
+          <input type="text" class="form-input" placeholder="John Doe" id="contact-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">// your_email</label>
+          <input type="email" class="form-input" placeholder="john@example.com" id="contact-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">// subject</label>
+          <input type="text" class="form-input" placeholder="Project collaboration..." id="contact-subject">
+        </div>
+        <div class="form-group">
+          <label class="form-label">// message</label>
+          <textarea class="form-input" placeholder="Hey Chirag, I have a project..." id="contact-msg"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendMessage()" style="width:100%;justify-content:center">
+          ./send_message.sh --now
+        </button>
+        <div id="contact-status" style="margin-top:12px;font-size:0.75rem;color:var(--green);display:none"></div>
+      </div>
+    </div>
+
+    <div class="contact-info animate-on-scroll" style="transition-delay:0.3s">
+      <a href="https://t.me/chirag" class="contact-link" target="_blank">
+        <span class="contact-link-icon">✈️</span>
+        <div>
+          <span class="contact-link-label">// telegram</span>
+          <span class="contact-link-value">@chirag</span>
+        </div>
+      </a>
+      <a href="mailto:chirag@example.com" class="contact-link">
+        <span class="contact-link-icon">📧</span>
+        <div>
+          <span class="contact-link-label">// email</span>
+          <span class="contact-link-value">chirag@example.com</span>
+        </div>
+      </a>
+      <a href="https://github.com/chirag" class="contact-link" target="_blank">
+        <span class="contact-link-icon">🐙</span>
+        <div>
+          <span class="contact-link-label">// github</span>
+          <span class="contact-link-value">github.com/chirag</span>
+        </div>
+      </a>
+      <a href="#" class="contact-link">
+        <span class="contact-link-icon">📍</span>
+        <div>
+          <span class="contact-link-label">// location</span>
+          <span class="contact-link-value">Meerut, Uttar Pradesh, India</span>
+        </div>
+      </a>
+      <div class="contact-link" style="cursor:default">
+        <span class="contact-link-icon">⏰</span>
+        <div>
+          <span class="contact-link-label">// timezone</span>
+          <span class="contact-link-value">IST (UTC+5:30) — Usually online</span>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;background:var(--bg3);border:1px solid var(--border-bright);border-radius:8px;padding:20px">
+        <div style="font-size:0.68rem;color:var(--text-dim);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase">// availability_status</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div class="status-dot"></div>
+          <span style="font-size:0.82rem;color:var(--green);font-weight:700">OPEN FOR PROJECTS</span>
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-dim);line-height:1.8">
+          Available for backend development, automation systems, Telegram bot projects, VoIP integrations, and server management contracts.
+        </div>
+        <div style="margin-top:12px;font-size:0.7rem;color:var(--text-dim);border-top:1px solid var(--border-bright);padding-top:12px">
+          <span style="color:var(--green)">Response time:</span> &lt; 2 hours via Telegram
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <span class="foot-logo">CHIRAG</span>
+  <div>chirag@portfolio:~$ echo "Built with 💚 passion and terminal aesthetics"</div>
+  <div style="margin-top:8px;color:var(--text-dim)">Backend Engineer · Server Architect · Automation Specialist</div>
+  <div style="margin-top:16px;font-size:0.65rem;color:#333">© 2026 Chirag. All systems operational.</div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// LOADING SCREEN
+// ═══════════════════════════════════════════════════════
+const loader = document.getElementById('loader');
+const loaderFill = document.getElementById('loader-fill');
+const loaderPct = document.getElementById('loader-pct');
+const sshLog = document.getElementById('ssh-log');
+
+const sshMessages = [
+  { text: 'Connecting to portfolio.chirag.dev...', cls: '' },
+  { text: 'SSH handshake complete.', cls: 'ok' },
+  { text: 'Authenticating credentials...', cls: '' },
+  { text: 'Loading system modules...', cls: '' },
+  { text: 'Mounting /projects volume...', cls: 'ok' },
+  { text: 'Starting services: flask nginx mysql', cls: 'ok' },
+  { text: 'WARNING: Matrix rain enabled', cls: 'warn' },
+  { text: 'All systems operational. Welcome.', cls: 'ok' },
+];
+
+let pct = 0;
+let msgIdx = 0;
+const loadInterval = setInterval(() => {
+  pct += Math.random() * 8 + 2;
+  if (pct > 100) pct = 100;
+  loaderFill.style.width = pct + '%';
+  loaderPct.textContent = Math.floor(pct) + '%';
+
+  if (msgIdx < sshMessages.length && pct > (msgIdx + 1) * (100 / sshMessages.length)) {
+    const line = document.createElement('div');
+    line.className = 'ssh-line ' + sshMessages[msgIdx].cls;
+    line.textContent = '→ ' + sshMessages[msgIdx].text;
+    sshLog.appendChild(line);
+    msgIdx++;
+  }
+
+  if (pct >= 100) {
+    clearInterval(loadInterval);
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 800);
+      startHeroAnimation();
+    }, 400);
+  }
+}, 80);
+
+// ═══════════════════════════════════════════════════════
+// CUSTOM CURSOR
+// ═══════════════════════════════════════════════════════
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+});
+
+function animateCursor() {
+  curX += (mouseX - curX) * 0.12;
+  curY += (mouseY - curY) * 0.12;
+  cursor.style.left = curX + 'px';
+  cursor.style.top = curY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// Click burst effect
+document.addEventListener('click', e => {
+  const chars = '01アイウエオカキクケコ#$%&@█▓▒';
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('span');
+    el.className = 'burst-char';
+    el.textContent = chars[Math.floor(Math.random() * chars.length)];
+    const angle = (Math.PI * 2 * i) / 8;
+    const dist = 40 + Math.random() * 40;
+    el.style.left = e.clientX + 'px';
+    el.style.top = e.clientY + 'px';
+    el.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
+    el.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 800);
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// MATRIX RAIN
+// ═══════════════════════════════════════════════════════
+const matrixCanvas = document.getElementById('matrix-canvas');
+const mctx = matrixCanvas.getContext('2d');
+
+function resizeMatrix() {
+  matrixCanvas.width = window.innerWidth;
+  matrixCanvas.height = window.innerHeight;
+}
+resizeMatrix();
+window.addEventListener('resize', resizeMatrix);
+
+const matrixChars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ#$%@!&*<>[]{}|/\\';
+const colWidth = 18;
+let drops = [];
+function initDrops() {
+  const cols = Math.ceil(window.innerWidth / colWidth);
+  drops = Array.from({ length: cols }, () => Math.random() * -100);
+}
+initDrops();
+window.addEventListener('resize', initDrops);
+
+setInterval(() => {
+  mctx.fillStyle = 'rgba(10,12,10,0.05)';
+  mctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+  mctx.font = '14px JetBrains Mono, monospace';
+  drops.forEach((y, i) => {
+    const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+    const bright = Math.random() > 0.9;
+    mctx.fillStyle = bright ? '#ffffff' : '#00ff88';
+    mctx.fillText(char, i * colWidth, y * colWidth);
+    if (y * colWidth > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i] += 0.5;
+  });
+}, 50);
+
+// ═══════════════════════════════════════════════════════
+// PARTICLE NETWORK
+// ═══════════════════════════════════════════════════════
+const pCanvas = document.getElementById('particle-canvas');
+const pctx = pCanvas.getContext('2d');
+pCanvas.width = window.innerWidth;
+pCanvas.height = window.innerHeight;
+window.addEventListener('resize', () => { pCanvas.width = window.innerWidth; pCanvas.height = window.innerHeight; });
+
+const particles = [];
+for (let i = 0; i < 60; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    r: Math.random() * 2 + 0.5,
+  });
+}
+
+function drawParticles() {
+  pctx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > pCanvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > pCanvas.height) p.vy *= -1;
+    pctx.beginPath();
+    pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    pctx.fillStyle = 'rgba(0,255,136,0.6)';
+    pctx.fill();
+  });
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < 120) {
+        pctx.beginPath();
+        pctx.strokeStyle = `rgba(0,255,136,${0.15 * (1 - d / 120)})`;
+        pctx.lineWidth = 0.5;
+        pctx.moveTo(particles[i].x, particles[i].y);
+        pctx.lineTo(particles[j].x, particles[j].y);
+        pctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ═══════════════════════════════════════════════════════
+// HERO TYPEWRITER ANIMATION
+// ═══════════════════════════════════════════════════════
+function typeText(el, text, speed, cb) {
+  let i = 0;
+  const interval = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) { clearInterval(interval); if (cb) cb(); }
+  }, speed);
+}
+
+function startHeroAnimation() {
+  const cmd1 = document.getElementById('type-cmd1');
+  typeText(cmd1, 'neofetch --colors 2 3 4 5 --backend kitty', 40, () => {
+    setTimeout(() => {
+      document.getElementById('hero-output').style.display = 'block';
+      document.getElementById('hero-name-block').style.display = 'block';
+      setTimeout(() => {
+        document.getElementById('line2').style.display = 'flex';
+        typeText(document.getElementById('type-bio'),
+          'Building automation tools, Telegram bots, payment systems & server infrastructure from Meerut, India.',
+          25, () => {
+            setTimeout(() => {
+              document.getElementById('tag-row').style.display = 'flex';
+              document.getElementById('hero-cta').style.display = 'flex';
+              animateCounters();
+            }, 300);
+          });
+      }, 200);
+    }, 300);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// COUNTER ANIMATION
+// ═══════════════════════════════════════════════════════
+function animateCounters() {
+  document.querySelectorAll('[data-target]').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    let cur = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+      cur = Math.min(cur + step, target);
+      el.textContent = Math.floor(cur) + (el.closest('.stat').querySelector('.stat-label').textContent.includes('%') ? '' : '+');
+      if (cur >= target) clearInterval(timer);
+    }, 20);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SCROLL ANIMATIONS
+// ═══════════════════════════════════════════════════════
+const scrollProgress = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const total = document.body.scrollHeight - window.innerHeight;
+  scrollProgress.style.transform = `scaleX(${window.scrollY / total})`;
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 80) el.classList.add('visible');
+  });
+  // Skill bars
+  document.querySelectorAll('.skill-fill:not(.filled)').forEach(bar => {
+    const rect = bar.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 40) {
+      bar.style.width = bar.dataset.width + '%';
+      bar.classList.add('filled');
+    }
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// UPTIME COUNTER
+// ═══════════════════════════════════════════════════════
+const startTime = Date.now();
+setInterval(() => {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+  const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+  const s = String(elapsed % 60).padStart(2, '0');
+  document.getElementById('uptime').textContent = `${h}:${m}:${s}`;
+}, 1000);
+
+// ═══════════════════════════════════════════════════════
+// NETWORK GRAPH (animated line graph)
+// ═══════════════════════════════════════════════════════
+const netCanvas = document.getElementById('network-canvas');
+if (netCanvas) {
+  const nc = netCanvas.getContext('2d');
+  const netData = Array.from({ length: 80 }, () => Math.random() * 60 + 20);
+  function drawNetwork() {
+    const w = netCanvas.offsetWidth || 400;
+    const h = 120;
+    netCanvas.width = w;
+    nc.clearRect(0, 0, w, h);
+    // Grid lines
+    nc.strokeStyle = 'rgba(0,255,136,0.06)';
+    nc.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      nc.beginPath(); nc.moveTo(0, i * h / 4); nc.lineTo(w, i * h / 4); nc.stroke();
+    }
+    // Gradient fill
+    const grad = nc.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(0,255,136,0.3)');
+    grad.addColorStop(1, 'rgba(0,255,136,0.01)');
+    nc.beginPath();
+    netData.forEach((d, i) => {
+      const x = i * (w / (netData.length - 1));
+      const y = h - (d / 100) * h;
+      i === 0 ? nc.moveTo(x, y) : nc.lineTo(x, y);
+    });
+    nc.lineTo(w, h); nc.lineTo(0, h); nc.closePath();
+    nc.fillStyle = grad; nc.fill();
+    // Line
+    nc.beginPath();
+    netData.forEach((d, i) => {
+      const x = i * (w / (netData.length - 1));
+      const y = h - (d / 100) * h;
+      i === 0 ? nc.moveTo(x, y) : nc.lineTo(x, y);
+    });
+    nc.strokeStyle = 'rgba(0,255,136,0.8)'; nc.lineWidth = 1.5; nc.stroke();
+  }
+  setInterval(() => {
+    netData.shift(); netData.push(Math.random() * 60 + 20); drawNetwork();
+  }, 200);
+  drawNetwork();
+}
+
+// ═══════════════════════════════════════════════════════
+// INTERACTIVE TERMINAL
+// ═══════════════════════════════════════════════════════
+const liveOutput = document.getElementById('live-output');
+const liveInput = document.getElementById('live-input');
+let cmdHistory = [];
+let histIdx = -1;
+
+const COMMANDS = {
+  help: () => `<div style="color:var(--cyan)">Available commands:</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">about</span>       — Who is Chirag?</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">skills</span>      — Tech stack and expertise</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">projects</span>    — List of built projects</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">contact</span>     — How to reach Chirag</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">whoami</span>      — System identity</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">ls</span>          — List files</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">cat resume</span>  — Print resume summary</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">ping</span>        — Test connection</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">uname -a</span>   — System info</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">uptime</span>      — Session uptime</div>
+<div style="color:var(--text-dim)">  <span style="color:var(--green)">clear</span>       — Clear terminal</div>`,
+
+  about: () => `<div style="color:var(--green)">Chirag — Backend Engineer & Server Architect</div>
+<div style="color:var(--text-dim)">Location  : Meerut, Uttar Pradesh, India</div>
+<div style="color:var(--text-dim)">Specialty : Python automation, Telegram bots, VoIP systems</div>
+<div style="color:var(--text-dim)">Experience: 4+ years building real-money transaction systems</div>
+<div style="color:var(--text-dim)">Philosophy: Automate everything. Ship fast. Build solid.</div>`,
+
+  skills: () => `<div style="color:var(--cyan)">Core Skills:</div>
+<div><span style="color:var(--green)">  ████████████████████</span> Python 95%</div>
+<div><span style="color:var(--green)">  ██████████████████  </span> Telegram Bots 95%</div>
+<div><span style="color:var(--green)">  ██████████████████  </span> Flask 90%</div>
+<div><span style="color:var(--green)">  ██████████████████  </span> MySQL 90%</div>
+<div><span style="color:var(--yellow)">  ████████████████    </span> Selenium 92%</div>
+<div><span style="color:var(--cyan)">  ████████████████    </span> Linux/VPS 93%</div>
+<div><span style="color:var(--purple)">  ████████████████    </span> Asterisk ARI 85%</div>`,
+
+  projects: () => `<div style="color:var(--cyan)">drwxr-xr-x  projects/</div>
+<div style="color:var(--text-dim)">  pressonebot/      — Asterisk ARI multi-user call system</div>
+<div style="color:var(--text-dim)">  crypto_key_bot/   — BTCPay/LitePay key selling bot</div>
+<div style="color:var(--text-dim)">  bharat_gas_bot/   — Selenium gas booking automation</div>
+<div style="color:var(--text-dim)">  lpg_booking_bot/  — Credit-based LPG booking bot</div>
+<div style="color:var(--text-dim)">  admin_chat/       — Bi-directional Flask+Telegram chat</div>
+<div style="color:var(--text-dim)">  audio_stream/     — WebSocket+Deepgram transcription</div>
+<div style="color:var(--text-dim)">  delivery_credits/ — Android UIAutomator credit system</div>
+<div style="color:var(--text-dim)">  bbps_wallet/      — Utility bill payment platform</div>`,
+
+  contact: () => `<div style="color:var(--green)">Contact Information:</div>
+<div style="color:var(--text-dim)">  Telegram : @chirag</div>
+<div style="color:var(--text-dim)">  Email    : chirag@example.com</div>
+<div style="color:var(--text-dim)">  GitHub   : github.com/chirag</div>
+<div style="color:var(--yellow)">  Response : &lt; 2 hours via Telegram</div>`,
+
+  whoami: () => `<div style="color:var(--green)">chirag</div>
+<div style="color:var(--text-dim)">uid=1337(chirag) gid=1337(engineers)</div>
+<div style="color:var(--text-dim)">groups=backend,automation,voip,payments,servers</div>`,
+
+  ls: () => `<div style="color:var(--cyan)">drwxr-xr-x  projects/</div>
+<div style="color:var(--cyan)">drwxr-xr-x  skills/</div>
+<div style="color:var(--green)">-rw-r--r--  resume.txt</div>
+<div style="color:var(--green)">-rw-r--r--  about.md</div>
+<div style="color:var(--green)">-rwxr-xr-x  contact.sh</div>
+<div style="color:var(--yellow)">-rw-r--r--  .secret_projects (permission denied)</div>`,
+
+  'cat resume': () => `<div style="color:var(--green)">== CHIRAG — BACKEND ENGINEER ==</div>
+<div style="color:var(--text-dim)">Summary: Python backend specialist with 4+ years building</div>
+<div style="color:var(--text-dim)">automation systems, Telegram bots, VoIP platforms, and</div>
+<div style="color:var(--text-dim)">real-money payment integrations. Expert in server management.</div>
+<div style="color:var(--cyan)">Open to: Backend projects, automation, bot development</div>`,
+
+  ping: () => `<div style="color:var(--text-dim)">PING portfolio.chirag.dev (127.0.0.1)</div>
+<div style="color:var(--green)">64 bytes from chirag: icmp_seq=1 ttl=64 time=0.1ms</div>
+<div style="color:var(--green)">64 bytes from chirag: icmp_seq=2 ttl=64 time=0.1ms</div>
+<div style="color:var(--green)">64 bytes from chirag: icmp_seq=3 ttl=64 time=0.1ms</div>
+<div style="color:var(--yellow)">--- ping statistics ---</div>
+<div style="color:var(--text-dim)">3 packets: 3 received, 0% packet loss</div>`,
+
+  'uname -a': () => `<div style="color:var(--text-dim)">Linux chirag-portfolio 6.x.x #1 SMP PREEMPT x86_64 GNU/Linux</div>
+<div style="color:var(--green)">Kernel: ChiragOS — Automation Edition</div>`,
+
+  uptime: () => {
+    const e = Math.floor((Date.now() - startTime) / 1000);
+    const h = Math.floor(e / 3600), m = Math.floor((e % 3600) / 60), s = e % 60;
+    return `<div style="color:var(--text-dim)"> up ${h}h ${m}m ${s}s, load avg: shipping, building, deploying</div>`;
+  },
+
+  clear: () => { liveOutput.innerHTML = ''; return null; },
+
+  sudo: () => `<div style="color:var(--red)">[sudo] password for guest: </div>
+<div style="color:var(--red)">Sorry, user guest is not in the sudoers file. This incident will be reported.</div>`,
+
+  matrix: () => `<div style="color:var(--green)">Wake up, Neo... The Matrix has you.</div>
+<div style="color:var(--text-dim)">Follow the white rabbit. 🐇</div>`,
+
+  mail: (args) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const to = (args || '').trim();
+
+      if (!to) {
+        return `<div style="color:var(--red)">Usage: mail &lt;email@example.com&gt;</div>
+    <div style="color:var(--text-dim)">Example: mail xyz@gmail.com</div>`;
+      }
+      if (!emailRegex.test(to)) {
+        return `<div style="color:var(--red)">✗ Invalid email: ${to}</div>`;
+      }
+
+      // fire and forget — show status in terminal
+      sendMailToVisitor(to);
+      return null;
+    },
+
+
+  hack: () => `<div style="color:var(--green)">INITIATING HACK SEQUENCE...</div>
+<div style="color:var(--text-dim)">Accessing mainframe...</div>
+<div style="color:var(--yellow)">Bypassing firewall... done.</div>
+<div style="color:var(--green)">Just kidding. I build systems, not break them. 😄</div>`,
+};
+
+function termPrint(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  liveOutput.appendChild(div);
+  liveOutput.scrollTop = liveOutput.scrollHeight;
+}
+
+
+function sendMailToVisitor(to) {
+  const safeId = 'ms-' + Date.now();
+
+  termPrint(`<div style="color:var(--text-dim)">┌──────────────────────────────────────────┐</div>`);
+  termPrint(`<div style="color:var(--text-dim)">│ <span style="color:var(--cyan)">SMTP</span> → connecting to mail server...      │</div>`);
+  termPrint(`<div style="color:var(--text-dim)">├──────────────────────────────────────────┤</div>`);
+  termPrint(`<div style="color:var(--text-dim)">│ <span style="color:var(--text-dim)">To     :</span> <span style="color:var(--green)">${to}</span></div>`);
+  termPrint(`<div style="color:var(--text-dim)">│ <span style="color:var(--text-dim)">From   :</span> <span style="color:var(--yellow)">Chirag &lt;chiragsingh@gmail.com&gt;</span></div>`);
+  termPrint(`<div style="color:var(--text-dim)">│ <span style="color:var(--text-dim)">Subject:</span> <span style="color:var(--text-bright)">Hey! You reached out via my Portfolio Terminal 👋</span></div>`);
+  termPrint(`<div style="color:var(--text-dim)">├──────────────────────────────────────────┤</div>`);
+  termPrint(`<div id="${safeId}" style="color:var(--text-dim)">│ <span style="color:var(--yellow)">Status :</span> <span id="${safeId}-txt"> sending<span id="${safeId}-dots"></span></span></div>`);
+  termPrint(`<div style="color:var(--text-dim)">└──────────────────────────────────────────┘</div>`);
+  liveOutput.scrollTop = liveOutput.scrollHeight;
+
+  // animate dots while waiting
+  let d = 0;
+  const iv = setInterval(() => {
+    const el = document.getElementById(`${safeId}-dots`);
+    if (el) { d = (d + 1) % 4; el.textContent = '.'.repeat(d); }
+  }, 350);
+
+  fetch('/api/send-mail', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ to })
+  })
+  .then(r => r.json())
+  .then(data => {
+    clearInterval(iv);
+    const txt = document.getElementById(`${safeId}-txt`);
+    if (data.success) {
+      if (txt) txt.innerHTML = `<span style="color:var(--green)">✓ DELIVERED → ${to}</span>`;
+      termPrint(`<div style="color:var(--green)">✓ Mail sent to <span style="color:var(--cyan)">${to}</span> at ${new Date().toLocaleTimeString()}</div>`);
+      termPrint(`<div style="color:var(--text-dim)">  Check your inbox — reply to reach Chirag directly.</div>`);
+    } else {
+      if (txt) txt.innerHTML = `<span style="color:var(--red)">✗ FAILED — ${data.error}</span>`;
+      termPrint(`<div style="color:var(--red)">✗ Failed: ${data.error}</div>`);
+    }
+    termPrint('<br>');
+    liveOutput.scrollTop = liveOutput.scrollHeight;
+  })
+  .catch(() => {
+    clearInterval(iv);
+    const txt = document.getElementById(`${safeId}-txt`);
+    if (txt) txt.innerHTML = `<span style="color:var(--red)">✗ CONNECTION REFUSED</span>`;
+    termPrint(`<div style="color:var(--red)">✗ Could not reach mail server.</div><br>`);
+    liveOutput.scrollTop = liveOutput.scrollHeight;
+  });
+}
+
+
+// function execCommand(cmd) {
+//   const trimmed = cmd.trim().toLowerCase();
+//   termPrint(`<div><span style="color:var(--green)">guest@portfolio:~$</span> <span style="color:var(--text-bright)">${cmd}</span></div>`);
+//   if (!trimmed) return;
+//   cmdHistory.unshift(cmd);
+//   histIdx = -1;
+//   const fn = COMMANDS[trimmed] || (() => `<div style="color:var(--red)">command not found: ${cmd}</div><div style="color:var(--text-dim)">Type <span style="color:var(--green)">help</span> for available commands.</div>`);
+//   const out = fn();
+//   if (out !== null) termPrint(out);
+//   termPrint('<br>');
+// }
+
+function execCommand(cmd) {
+  const trimmed = cmd.trim();
+  termPrint(`<div><span style="color:var(--green)">chirag@portfolio:~$</span> <span style="color:var(--text-bright)">${cmd}</span></div>`);
+  if (!trimmed) return;
+  cmdHistory.unshift(cmd);
+  histIdx = -1;
+
+  const spaceIdx = trimmed.indexOf(' ');
+  const cmdName  = spaceIdx !== -1 ? trimmed.slice(0, spaceIdx).toLowerCase() : trimmed.toLowerCase();
+  const cmdArgs  = spaceIdx !== -1 ? trimmed.slice(spaceIdx + 1) : '';
+
+  if (cmdName === 'mail') {
+    const out = COMMANDS['mail'](cmdArgs);
+    if (out !== null && out !== undefined) termPrint(out);
+    termPrint('<br>');
+    return;
+  }
+
+  const fn = COMMANDS[trimmed.toLowerCase()] || (() =>
+    `<div style="color:var(--red)">bash: ${cmd}: command not found</div>
+     <div style="color:var(--text-dim)">Type <span style="color:var(--green)">help</span> for commands.</div>`
+  );
+  const out = fn();
+  if (out !== null && out !== undefined) termPrint(out);
+  termPrint('<br>');
+}
+
+
+liveInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { execCommand(liveInput.value); liveInput.value = ''; }
+  else if (e.key === 'ArrowUp') { if (histIdx < cmdHistory.length - 1) { histIdx++; liveInput.value = cmdHistory[histIdx]; } }
+  else if (e.key === 'ArrowDown') { if (histIdx > 0) { histIdx--; liveInput.value = cmdHistory[histIdx]; } else { histIdx = -1; liveInput.value = ''; } }
+  else if (e.key === 'Tab') {
+    e.preventDefault();
+    const cmds = Object.keys(COMMANDS);
+    const match = cmds.find(c => c.startsWith(liveInput.value));
+    if (match) liveInput.value = match;
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// CONTACT FORM
+// ═══════════════════════════════════════════════════════
+function sendMessage() {
+  const name = document.getElementById('contact-name').value;
+  const email = document.getElementById('contact-email').value;
+  const subject = document.getElementById('contact-subject').value;
+  const msg = document.getElementById('contact-msg').value;
+  const status = document.getElementById('contact-status');
+  if (!name || !email || !msg) {
+    status.style.display = 'block';
+    status.style.color = 'var(--red)';
+    status.textContent = 'ERROR: Required fields missing. Please fill all fields.';
+    return;
+  }
+  status.style.display = 'block';
+  status.style.color = 'var(--yellow)';
+  status.textContent = 'Sending message...';
+  setTimeout(() => {
+    status.style.color = 'var(--green)';
+    status.innerHTML = '✓ Message delivered successfully! Response within 2 hours.';
+    document.getElementById('contact-name').value = '';
+    document.getElementById('contact-email').value = '';
+    document.getElementById('contact-subject').value = '';
+    document.getElementById('contact-msg').value = '';
+  }, 1200);
+}
+
+// ═══════════════════════════════════════════════════════
+// SMOOTH NAV HIGHLIGHT
+// ═══════════════════════════════════════════════════════
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(sec => {
+    if (window.scrollY >= sec.offsetTop - 100) cur = sec.id;
+  });
+  navLinks.forEach(a => {
+    a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--green)' : '';
+  });
+});
+
+// Initial scroll check
+setTimeout(() => {
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 80) el.classList.add('visible');
+  });
+  document.querySelectorAll('.skill-fill').forEach(bar => {
+    const rect = bar.getBoundingClientRect();
+    if (rect.top < window.innerHeight - 40) {
+      bar.style.width = bar.dataset.width + '%';
+      bar.classList.add('filled');
+    }
+  });
+}, 2000);
+</script>
+</body>
+</html>
