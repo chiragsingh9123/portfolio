@@ -3907,7 +3907,7 @@ function sendMailToVisitor(to) {
     if (el) { d = (d + 1) % 4; el.textContent = '.'.repeat(d); }
   }, 350);
 
-  fetch('https://chirag-portfolio-mli6.onrender.com/api/send-mail', {
+  fetch("{{ url_for('send_mail') }}", {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ to })
