@@ -278,6 +278,27 @@ This email was triggered from chirag.portfolio terminal
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
+@app.route("/health")
+def health_check():
+    return "OK", 200
+
+import threading
+import time
+import requests
+
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://chiragsingh.online/health")
+            print("self ping")
+        except:
+            pass
+        time.sleep(200)
+
+threading.Thread(target=keep_alive, daemon=True).start()
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5500))
     app.run(host="0.0.0.0", port=port)

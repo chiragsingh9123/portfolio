@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Portfolio — Floating Call Button Demo</title>
+<script src="./sip-0.21.2.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ── Demo portfolio background ─────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #f5f4f0;
+  min-height: 100vh;
+  color: #1a1a1a;
+  padding: 60px 40px;
+}
+
+.demo-hero {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.demo-hero h1 {
+  font-size: clamp(42px, 7vw, 80px);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 24px;
+  color: #111;
+}
+
+.demo-hero h1 em {
+  font-style: normal;
+  color: #b5a0ff;
+}
+
+.demo-hero p {
+  font-size: 17px;
+  color: #666;
+  line-height: 1.7;
+  max-width: 480px;
+  font-weight: 300;
+}
+
+/* ── FLOATING CALL WIDGET ─────────────────────────────────
+   Drop everything below into your portfolio.
+   Only dependencies: sip.js loaded somewhere above.
+   ─────────────────────────────────────────────────────── */
+
+/* Launcher pill */
+#ai-call-launcher {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 22px 14px 18px;
+  background: #111;
+  border-radius: 100px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+  transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#ai-call-launcher:hover {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.28), 0 4px 12px rgba(0,0,0,0.15);
+}
+
+#ai-call-launcher:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+.launcher-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #6ee77a;
+  box-shadow: 0 0 8px #6ee77a;
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+  animation: ldot-pulse 2.4s ease-in-out infinite;
+}
+
+.launcher-dot.busy   { background: #ffb800; box-shadow: 0 0 8px #ffb800; animation: ldot-pulse 1s infinite; }
+.launcher-dot.active { background: #7c3aed; box-shadow: 0 0 10px #7c3aed; animation: ldot-pulse 1.4s infinite; }
+.launcher-dot.off    { background: #444;    box-shadow: none; animation: none; }
+
+@keyframes ldot-pulse {
+  0%,100% { opacity:1; }
+  50%      { opacity:0.45; }
+}
+
+.launcher-icon {
+  width: 18px; height: 18px;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.launcher-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.launcher-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+}
+
+/* Expanded call panel */
+#ai-call-panel {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 9998;
+  width: 300px;
+  background: #111;
+  border-radius: 20px;
+  padding: 24px 22px 20px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.28s cubic-bezier(.34,1.4,.64,1);
+}
+
+#ai-call-panel.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Panel header */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.panel-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.panel-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+  font-family: 'Space Mono', monospace;
+}
+
+.panel-close {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.5);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+}
+
+.panel-close:hover { background: rgba(255,255,255,0.13); color: #fff; }
+
+/* Status bar */
+.panel-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.pstatus-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #444;
+  flex-shrink: 0;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.pstatus-dot.online  { background: #6ee77a; box-shadow: 0 0 7px #6ee77a; }
+.pstatus-dot.calling { background: #ffb800; box-shadow: 0 0 7px #ffb800; animation: ldot-pulse 1s infinite; }
+.pstatus-dot.active  { background: #b5a0ff; box-shadow: 0 0 9px #b5a0ff; animation: ldot-pulse 1.6s infinite; }
+.pstatus-dot.error   { background: #ff4d6a; box-shadow: 0 0 7px #ff4d6a; }
+
+.pstatus-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* Big call button inside panel */
+.panel-call-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 13px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  transition: all 0.18s;
+  background: linear-gradient(135deg, #b5a0ff, #7c3aed);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+}
+
+.panel-call-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(124,58,237,0.45);
+}
+
+.panel-call-btn:active:not(:disabled) { transform: scale(0.98); }
+
+.panel-call-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.panel-call-btn.calling {
+  background: linear-gradient(135deg, #ffb800, #e5900a);
+  box-shadow: 0 4px 20px rgba(255,184,0,0.3);
+}
+
+.panel-call-btn.active {
+  background: linear-gradient(135deg, #ff4d6a, #c0283e);
+  box-shadow: 0 4px 20px rgba(255,77,106,0.35);
+}
+
+.pcall-icon {
+  width: 17px; height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* Timer + waveform row */
+.panel-live {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.panel-live.visible { display: flex; }
+
+.panel-timer {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: #b5a0ff;
+  letter-spacing: 0.06em;
+}
+
+.panel-wave {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 20px;
+}
+
+.pw-bar {
+  width: 2.5px;
+  background: #b5a0ff;
+  border-radius: 2px;
+  opacity: 0.7;
+  animation: wave-anim 0.8s ease-in-out infinite alternate;
+}
+
+.pw-bar:nth-child(1) { animation-delay:0s;    height:4px; }
+.pw-bar:nth-child(2) { animation-delay:0.1s;  height:10px; }
+.pw-bar:nth-child(3) { animation-delay:0.2s;  height:16px; }
+.pw-bar:nth-child(4) { animation-delay:0.3s;  height:12px; }
+.pw-bar:nth-child(5) { animation-delay:0.4s;  height:20px; }
+.pw-bar:nth-child(6) { animation-delay:0.5s;  height:8px; }
+.pw-bar:nth-child(7) { animation-delay:0.6s;  height:14px; }
+
+@keyframes wave-anim {
+  from { transform:scaleY(0.25); opacity:0.35; }
+  to   { transform:scaleY(1);    opacity:0.85; }
+}
+
+/* Mini mute row */
+.panel-mini-controls {
+  display: none;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.panel-mini-controls.visible { display: flex; }
+
+.mini-btn {
+  flex: 1;
+  padding: 10px 6px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.09);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.45);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transition: all 0.15s;
+  outline: none;
+}
+
+.mini-btn svg {
+  width: 15px; height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mini-btn:hover { border-color: rgba(255,255,255,0.18); color: rgba(255,255,255,0.8); }
+.mini-btn.active { border-color: #ffb800; color: #ffb800; background: rgba(255,184,0,0.08); }
+
+audio { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Demo portfolio content -->
+<div class="demo-hero">
+  <h1>Building things<br>that <em>actually</em><br>matter.</h1>
+  <p>Full-stack developer & designer. I craft interfaces people love to use — from concept to code. Available for freelance and full-time opportunities.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     FLOATING CALL WIDGET — copy from here ↓
+     ════════════════════════════════════════════════════ -->
+
+<!-- Launcher pill (always visible) -->
+<button id="ai-call-launcher" onclick="togglePanel()">
+  <div class="launcher-dot" id="launcherDot"></div>
+  <svg class="launcher-icon" viewBox="0 0 24 24">
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5 19.79 19.79 0 01.01 2.82 2 2 0 012 .67h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.37a16 16 0 006.72 6.72l1.06-1.16a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+  </svg>
+  <div>
+    <div class="launcher-text">Talk to my AI</div>
+    <div class="launcher-sub" id="launcherSub">connecting…</div>
+  </div>
+</button>
+
+<!-- Expanded panel -->
+<div id="ai-call-panel">
+
+  <div class="panel-header">
+    <div>
+      <div class="panel-title">AI Assistant</div>
+      <div class="panel-sub" id="panelSub">EXT · 7003</div>
+    </div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+
+  <!-- Status bar -->
+  <div class="panel-status">
+    <div class="pstatus-dot" id="pDot"></div>
+    <div class="pstatus-text" id="pStatus">Connecting…</div>
+  </div>
+
+  <!-- Main call/hangup button -->
+  <button class="panel-call-btn" id="panelCallBtn" onclick="toggleCall()" disabled>
+    <svg class="pcall-icon" id="pcallIcon" viewBox="0 0 24 24">
+      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5 19.79 19.79 0 01.01 2.82 2 2 0 012 .67h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.37a16 16 0 006.72 6.72l1.06-1.16a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+    </svg>
+    <span id="pcallLabel">Call Now</span>
+  </button>
+
+  <!-- Live: timer + wave -->
+  <div class="panel-live" id="panelLive">
+    <div class="panel-timer" id="panelTimer">00:00</div>
+    <div class="panel-wave">
+      <div class="pw-bar"></div><div class="pw-bar"></div>
+      <div class="pw-bar"></div><div class="pw-bar"></div>
+      <div class="pw-bar"></div><div class="pw-bar"></div>
+      <div class="pw-bar"></div>
+    </div>
+  </div>
+
+  <!-- Mini controls: mute + hold -->
+  <div class="panel-mini-controls" id="panelMini">
+    <button class="mini-btn" id="miniMute" onclick="toggleMute()">
+      <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+      <span id="miniMuteLabel">Mute</span>
+    </button>
+    <button class="mini-btn" id="miniHold" onclick="toggleHold()">
+      <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+      <span id="miniHoldLabel">Hold</span>
+    </button>
+  </div>
+
+</div>
+
+<audio id="remoteAudio" autoplay></audio>
+
+<!-- ═══════════════════════════════════════════════════════
+     END WIDGET — copy to here ↑
+     ════════════════════════════════════════════════════ -->
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────
+const SIP_SERVER = 'ws://76.13.243.16:8088/ws';
+const SIP_HOST   = '76.13.243.16';
+const EXTENSION  = '1002';
+const PASSWORD   = 'admin6';
+const TARGET     = '7003';
+
+// ─── STATE ──────────────────────────────────────────────
+let userAgent = null, session = null;
+let isMuted = false, isOnHold = false;
+let timerIv = null, secs = 0;
+let panelOpen = false;
+
+// ─── ELEMENT REFS ───────────────────────────────────────
+const launcherDot  = document.getElementById('launcherDot');
+const launcherSub  = document.getElementById('launcherSub');
+const pDot         = document.getElementById('pDot');
+const pStatus      = document.getElementById('pStatus');
+const panelCallBtn = document.getElementById('panelCallBtn');
+const pcallLabel   = document.getElementById('pcallLabel');
+const pcallIcon    = document.getElementById('pcallIcon');
+const panelLive    = document.getElementById('panelLive');
+const panelMini    = document.getElementById('panelMini');
+const panelTimer   = document.getElementById('panelTimer');
+const miniMute     = document.getElementById('miniMute');
+const miniMuteLabel= document.getElementById('miniMuteLabel');
+const miniHold     = document.getElementById('miniHold');
+const miniHoldLabel= document.getElementById('miniHoldLabel');
+
+// ─── PANEL TOGGLE ───────────────────────────────────────
+function togglePanel() {
+  panelOpen ? closePanel() : openPanel();
+}
+
+function openPanel() {
+  panelOpen = true;
+  document.getElementById('ai-call-panel').classList.add('open');
+}
+
+function closePanel() {
+  panelOpen = false;
+  document.getElementById('ai-call-panel').classList.remove('open');
+}
+
+// Click outside to close
+document.addEventListener('click', e => {
+  if (!e.target.closest('#ai-call-panel') && !e.target.closest('#ai-call-launcher')) {
+    closePanel();
+  }
+});
+
+// ─── STATUS SYNC ────────────────────────────────────────
+function setStatus(msg, state) {
+  pDot.className = 'pstatus-dot ' + (state || '');
+  pStatus.textContent = msg.toUpperCase();
+
+  // Sync launcher dot too
+  const ldMap = { online: 'online', calling: 'busy', active: 'active', error: 'off', '': 'off' };
+  launcherDot.className = 'launcher-dot ' + (ldMap[state] || '');
+}
+
+// ─── SIP REGISTER ───────────────────────────────────────
+async function register() {
+  setStatus('Connecting…', '');
+  launcherSub.textContent = 'connecting…';
+
+  const uri = SIP.UserAgent.makeURI(`sip:${EXTENSION}@${SIP_HOST}`);
+  userAgent = new SIP.UserAgent({
+    uri,
+    transportOptions: { server: SIP_SERVER },
+    authorizationUsername: EXTENSION,
+    authorizationPassword: PASSWORD,
+    sessionDescriptionHandlerFactoryOptions: {
+      constraints: { audio: true, video: false }
+    }
+  });
+
+  const registerer = new SIP.Registerer(userAgent);
+  await userAgent.start();
+  await registerer.register();
+
+  setStatus('Ready', 'online');
+  launcherSub.textContent = 'available now';
+  panelCallBtn.disabled = false;
+}
+
+// ─── CALL TOGGLE ────────────────────────────────────────
+function toggleCall() {
+  session ? hangup() : makeCall();
+}
+
+async function makeCall() {
+  if (!userAgent) return;
+
+  const targetURI = SIP.UserAgent.makeURI(`sip:${TARGET}@${SIP_HOST}`);
+  const inviter = new SIP.Inviter(userAgent, targetURI, {
+    sessionDescriptionHandlerOptions: { constraints: { audio: true, video: false } }
+  });
+
+  session = inviter;
+  setCallingUI();
+
+  inviter.stateChange.addListener(state => {
+    if (state === SIP.SessionState.Established) {
+      attachAudio(inviter);
+      setActiveUI();
+    } else if (state === SIP.SessionState.Terminated || state === SIP.SessionState.Terminating) {
+      onEnded();
+    }
+  });
+
+  try { await inviter.invite(); }
+  catch(e) {
+    console.error(e);
+    setStatus('Call failed', 'error');
+    setIdleUI();
+    session = null;
+  }
+}
+
+function attachAudio(s) {
+  const audio = document.getElementById('remoteAudio');
+  const sdh = s.sessionDescriptionHandler;
+  if (!sdh?.peerConnection) return;
+  const stream = new MediaStream();
+  sdh.peerConnection.getReceivers().forEach(r => r.track && stream.addTrack(r.track));
+  audio.srcObject = stream;
+  audio.play().catch(()=>{});
+}
+
+function hangup() {
+  if (!session) return;
+  try {
+    const st = session.state;
+    if (st === SIP.SessionState.Established || st === SIP.SessionState.Establishing) {
+      session.bye().catch(()=>{});
+    } else {
+      session.cancel().catch(()=>{});
+    }
+  } catch(e) { console.error(e); }
+}
+
+function onEnded() {
+  session = null; isMuted = false; isOnHold = false;
+  document.getElementById('remoteAudio').srcObject = null;
+  miniMute.classList.remove('active'); miniHold.classList.remove('active');
+  miniMuteLabel.textContent = 'Mute'; miniHoldLabel.textContent = 'Hold';
+  setStatus('Ready', 'online');
+  launcherSub.textContent = 'available now';
+  setIdleUI();
+}
+
+// ─── UI STATES ──────────────────────────────────────────
+function setIdleUI() {
+  panelCallBtn.className = 'panel-call-btn';
+  panelCallBtn.disabled = false;
+  pcallLabel.textContent = 'Call Now';
+  setPcallPhone();
+  panelLive.classList.remove('visible');
+  panelMini.classList.remove('visible');
+  stopTimer();
+}
+
+function setCallingUI() {
+  panelCallBtn.className = 'panel-call-btn calling';
+  pcallLabel.textContent = 'Calling…';
+  setPcallPhone();
+  setStatus('Dialing…', 'calling');
+  launcherSub.textContent = 'calling…';
+}
+
+function setActiveUI() {
+  panelCallBtn.className = 'panel-call-btn active';
+  pcallLabel.textContent = 'End Call';
+  // Switch to X icon
+  pcallIcon.innerHTML = `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`;
+  panelLive.classList.add('visible');
+  panelMini.classList.add('visible');
+  setStatus('On call', 'active');
+  launcherSub.textContent = 'in call…';
+  startTimer();
+}
+
+function setPcallPhone() {
+  pcallIcon.innerHTML = `<path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5 19.79 19.79 0 01.01 2.82 2 2 0 012 .67h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.37a16 16 0 006.72 6.72l1.06-1.16a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>`;
+}
+
+// ─── TIMER ──────────────────────────────────────────────
+function startTimer() {
+  secs = 0; panelTimer.textContent = '00:00';
+  timerIv = setInterval(() => {
+    secs++;
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    panelTimer.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerIv); timerIv = null; secs = 0;
+  panelTimer.textContent = '00:00';
+}
+
+// ─── MUTE / HOLD ────────────────────────────────────────
+function toggleMute() {
+  if (!session) return;
+  isMuted = !isMuted;
+  session.sessionDescriptionHandler?.peerConnection?.getSenders().forEach(s => {
+    if (s.track?.kind === 'audio') s.track.enabled = !isMuted;
+  });
+  miniMute.classList.toggle('active', isMuted);
+  miniMuteLabel.textContent = isMuted ? 'Unmute' : 'Mute';
+}
+
+function toggleHold() {
+  if (!session) return;
+  isOnHold = !isOnHold;
+  const pc = session.sessionDescriptionHandler?.peerConnection;
+  if (pc) {
+    pc.getSenders().forEach(s => { if (s.track?.kind==='audio') s.track.enabled = !isOnHold; });
+    pc.getReceivers().forEach(r => { if (r.track?.kind==='audio') r.track.enabled = !isOnHold; });
+  }
+  miniHold.classList.toggle('active', isOnHold);
+  miniHoldLabel.textContent = isOnHold ? 'Resume' : 'Hold';
+}
+
+// ─── INIT ───────────────────────────────────────────────
+window.addEventListener('load', () => {
+  register().catch(e => {
+    console.error(e);
+    setStatus('Offline', 'error');
+    launcherSub.textContent = 'offline';
+  });
+});
+</script>
+
+</body>
+</html>
