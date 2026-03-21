@@ -17,18 +17,11 @@ jobs:
           username: root
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          script: |
-            echo "📥 Pull latest code"
-            cd /root/portfolio
-            git pull origin main
+          script: |            
+            tmux has-session -t portfolio 2>/dev/null || tmux new -d -s portfolio-3
 
-            echo "🛑 Stop running app"
-            tmux attach  -t portfolio-3 C-c || true
+            tmux send-keys -t portfolio C-c
+            sleep 1
+            tmux send-keys -t portfolio-3 "git pull origin main" Enter
 
-            sleep 2
-
-            echo "🚀 Start new app"
-
-            tmux attach -t portfolio-3 "python smpppp.py" Enter
-
-            echo "✅ Deploy done"
+            tmux send-keys -t portfolio "python smpppp.py" Enter
