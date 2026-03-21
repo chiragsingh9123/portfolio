@@ -7,27 +7,32 @@ on:
 
 jobs:
   deploy:
-    runs-on: debian-latest
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS using tmux
+      - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 76.13.243.16
           username: root
           key: ${{ secrets.SSH_KEY }}
+          debug: true
           script: |
+            echo "Connected to server"
+
             cd /root/portfolio
 
-            echo "📥 Pull latest code"
+            echo "Pulling latest code"
             git pull origin main
 
-            echo "🛑 Stop old process"
-            tmux send-keys -t portfolio C-c
+            echo "Stopping old app"
+            tmux send-keys -t portfolio C-c || true
 
             sleep 2
 
-            echo "🚀 Start new process"
+            echo "Starting app"
+            tmux send-keys -t portfolio "cd /root/portfolio" Enter
+            tmux send-keys -t portfolio "source env/bin/activate" Enter
             tmux send-keys -t portfolio "python smpppp.py" Enter
 
-            echo "✅ Deploy complete"
+            echo "Deploy complete"
