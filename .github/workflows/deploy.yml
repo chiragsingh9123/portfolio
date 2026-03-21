@@ -23,13 +23,12 @@ jobs:
             git pull origin main
 
             echo "🛑 Stop running app"
-            tmux send-keys -t portfolio-3 C-c || true
+            tmux attach send-keys -t portfolio-3 C-c || true
 
             sleep 2
 
             echo "🚀 Start new app"
-            tmux send-keys -t portfolio-3 "cd /root/portfolio" Enter
-            tmux send-keys -t portfolio-3 "source env/bin/activate" Enter
-            tmux send-keys -t portfolio-3 "python smpppp.py" Enter
+
+            tmux attach send-keys -t portfolio-3 "python smpppp.py" Enter
 
             echo "✅ Deploy done"
