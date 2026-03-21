@@ -32,6 +32,10 @@ def index():
     return render_template("index_light.html")
 
 
+@app.route("/sitemap.xml")
+def sitemap():
+    return app.send_static_file("sitemap.xml")
+
 @app.route("/api/send-mail", methods=["POST"])
 def send_mail():
     try:
@@ -277,6 +281,9 @@ This email was triggered from chirag.portfolio terminal
         logger.error(f"[MAIL] ✗ Unexpected: {e}")
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
+@app.route("/robots.txt")
+def robots():
+    return app.send_static_file("robots.txt")
 
 @app.route("/health")
 def health_check():
