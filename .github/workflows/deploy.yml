@@ -16,20 +16,20 @@ jobs:
           host: 76.13.243.16
           username: root
           key: ${{ secrets.SSH_KEY }}
-          debug: true
+          port: 22
           script: |
-            echo "Connected to server"
-
-            tmux send-keys -t potfolio-0 C-c || true
-            echo "Stopping old app"
-
-            sleep 2
-            echo "Pulling latest code"
+            echo "📥 Pull latest code"
+            cd /root/portfolio
             git pull origin main
 
+            echo "🛑 Stop running app"
+            tmux send-keys -t portfolio-3 C-c || true
 
+            sleep 2
 
-            echo "Starting app"
-            tmux send-keys -t portfolio "python smpppp.py" Enter
+            echo "🚀 Start new app"
+            tmux send-keys -t portfolio-3 "cd /root/portfolio" Enter
+            tmux send-keys -t portfolio-3 "source env/bin/activate" Enter
+            tmux send-keys -t portfolio-3 "python smpppp.py" Enter
 
-            echo "Deploy complete"
+            echo "✅ Deploy done"
