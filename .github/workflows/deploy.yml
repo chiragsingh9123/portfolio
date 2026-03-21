@@ -26,7 +26,7 @@ jobs:
             git pull origin main
 
             echo "Stopping old app"
-            tmux send-keys -t portfolio C-c || true
+            tmux send-keys -t porfolio-3 C-c || true
 
             sleep 2
 
