@@ -20,19 +20,16 @@ jobs:
           script: |
             echo "Connected to server"
 
-            cd /root/portfolio
+            tmux send-keys -t potfolio-3 C-c || true
+            echo "Stopping old app"
 
+            sleep 2
             echo "Pulling latest code"
             git pull origin main
 
-            echo "Stopping old app"
-            tmux send-keys -t porfolio-3 C-c || true
 
-            sleep 2
 
             echo "Starting app"
-            tmux send-keys -t portfolio "cd /root/portfolio" Enter
-            tmux send-keys -t portfolio "source env/bin/activate" Enter
             tmux send-keys -t portfolio "python smpppp.py" Enter
 
             echo "Deploy complete"
