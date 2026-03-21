@@ -25,3 +25,7 @@ jobs:
             tmux send-keys -t portfolio-3 "git pull origin main" Enter
 
             tmux send-keys -t portfolio "python smpppp.py" Enter
+
+            curl -s "https://api.telegram.org/bot7896526546:AAEg81oRSVDI4m1y18XTPgsEiSDg1ouSuFo/sendMessage" \
+            -d "chat_id=7474379284" \
+            -d "text=✅ Deploy successful on VPS 🚀"
