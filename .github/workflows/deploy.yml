@@ -20,7 +20,7 @@ jobs:
           script: |
             echo "Connected to server"
 
-            tmux send-keys -t potfolio-3 C-c || true
+            tmux send-keys -t potfolio-0 C-c || true
             echo "Stopping old app"
 
             sleep 2
