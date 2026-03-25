@@ -22,7 +22,7 @@ jobs:
 
             tmux send-keys -t portfolio C-c
             sleep 1
-            tmux send-keys -t portfolio-3 "git pull origin main" Enter
+            tmux send-keys -t portfolio "git pull origin main" Enter
 
             tmux send-keys -t portfolio "python smpppp.py" Enter
 
