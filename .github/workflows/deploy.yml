@@ -28,4 +28,4 @@ jobs:
 
             curl -s "https://api.telegram.org/bot7896526546:AAEg81oRSVDI4m1y18XTPgsEiSDg1ouSuFo/sendMessage" \
             -d "chat_id=7474379284" \
-            -d "text=✅ Deploy successful on VPS 🚀"
+            -d "text=✅ Deploy successful on VPS  🚀"
